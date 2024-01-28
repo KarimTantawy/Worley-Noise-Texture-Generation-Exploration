@@ -1,10 +1,9 @@
-Shader "Custom/WorleyTexVar7"
+Shader "Custom/WorleyTexVar8"
 {
     Properties
     {
         _MainTex ("Color LUT", 2D) = "white" {}
         _WorleyScale("Worley Scale", Float) = 10.0
-        _FractalNoiseScale("Fractal Noise Scale", Float) = 15
     }
     SubShader
     {
@@ -24,7 +23,6 @@ Shader "Custom/WorleyTexVar7"
 
         sampler2D _MainTex;
         float _WorleyScale;
-        float _FractalNoiseScale;
 
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
@@ -48,7 +46,7 @@ Shader "Custom/WorleyTexVar7"
            return frac(sin(float2(dot(gridPosition, float2(127.1, 311.7)), dot(gridPosition, float2(269.5, 183.3)))) * 43758.5453);
         }
 
-        WorleyNoiseData worley(float2 uv)
+        WorleyNoiseData Worley(float2 uv)
         {
             WorleyNoiseData noiseData;
 
@@ -76,8 +74,10 @@ Shader "Custom/WorleyTexVar7"
                     //position of current feature point
                     float2 curPoint = randomNumGenerator(gridPos + neighbor);
 
-                    //euclidian distance from position of pixel to feature point
-                    float dist = length(neighbor + curPoint - gridPosRem);
+                    float2 vec = neighbor + curPoint - gridPosRem;
+
+                    //Manhatten distance from position of pixel to feature point
+                    float dist = abs(vec.x) + abs(vec.y);
                     
                     //checking if distance to feature point is closer than any of the currently stored distances
                     if (dist < noiseData.f1)
@@ -115,38 +115,22 @@ Shader "Custom/WorleyTexVar7"
             float2 scaledUV = IN.uv_MainTex * _WorleyScale;
 
             //generating the Worley noise data
-            WorleyNoiseData noiseData = worley(scaledUV);
+            WorleyNoiseData noiseData = Worley(scaledUV);
 
             //combination of distances
-            float distanceComb = noiseData.f1_id;
-            float distanceComb2 = noiseData.f2 - noiseData.f1;
-
-            float fractalValue;
-
-            //computing fractal version
-            for (int i = 0; i < 5; i++)
-            {
-                WorleyNoiseData noiseData = worley(pow(2, i) * IN.uv_MainTex * _FractalNoiseScale);
-
-                //summing noise at different scales
-                fractalValue += pow(2, -i) * noiseData.f1;
-            }
+            float distanceComb = noiseData.f1;
             
-            //lerping between smaller range to reduce affect of fractal on final color
-            fractalValue = smoothstep(0.0, 1.5, fractalValue);
+            distanceComb = clamp(distanceComb, 0.0, 1.0);
 
-            //normalizing value to range between 0.0 and 1.0 when adding the fractal value to the distance combination
-            //otherwise color would be oversaturated
-            float lutColor = smoothstep(0.0, 2.0, noiseData.f1 + fractalValue);
-
-            //uv coordinate for final LUT color
-            float2 uv = float2(lutColor, 0.5);
-
+            //use Color LUT to determine color of pixel
+            float2 uv = float2(1-distanceComb, 0.5);
+            
             //clamping values because edges of LUT texture are gray and affect the color gradient
             uv.x = clamp(uv.x, 0.01, 0.99);
 
-            //setting final color
-            fixed4 c = lerp(float4(0.0, 0.0, 0.0, 1.0), tex2D(_MainTex, uv), (1 - (length(IN.uv_MainTex - float2(0.5, 0.5)) * 2.0)) - 0.5);
+            fixed4 c = tex2D(_MainTex, uv);
+     
+            c = fixed4(distanceComb, distanceComb, distanceComb, 1.0);
 
             o.Albedo = c.rgb;
             o.Alpha = c.a;

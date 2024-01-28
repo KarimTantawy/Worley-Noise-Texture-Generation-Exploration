@@ -4,6 +4,10 @@ Shader "Custom/WorleyTexVar4"
     {
         _MainTex ("Color LUT", 2D) = "white" {}
         _WorleyScale("Worley Scale", Float) = 10.0
+        _GrooveNoiseIntensity("Grooves Noise Intensity", Range(0.0, 1.0)) = 0.6
+        _TileNoiseIntensity("Tile Noise Intensity", Range(0.0, 1.0)) = 0.6
+        _GrooveNoiseScale("Groove Noise Scale", Float) = 25
+        _TileNoiseScale("Tile Noise Scale", Float) = 45
     }
     SubShader
     {
@@ -23,6 +27,10 @@ Shader "Custom/WorleyTexVar4"
 
         sampler2D _MainTex;
         float _WorleyScale;
+        float _GrooveNoiseIntensity;
+        float _TileNoiseIntensity;
+        float _GrooveNoiseScale;
+        float _TileNoiseScale;
 
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
@@ -119,40 +127,50 @@ Shader "Custom/WorleyTexVar4"
             float distanceComb = noiseData.f1_id;
             float distanceComb2 = noiseData.f2 - noiseData.f1;
 
-            //use Color LUT to determine color of pixel
-            //float2 uv = float2((1-distanceComb) * step(0.05, distanceComb2), 0.5);
-            
+            //float that holds fractal noise to be used on grooves between tiles
             float fractalValue;
 
             //computing fractal version
             for (int i = 0; i < 5; i++)
             {
-                WorleyNoiseData noiseData = worley(pow(2, i) * IN.uv_MainTex * 15);
+                WorleyNoiseData noiseData = worley(pow(2, i) * IN.uv_MainTex * _GrooveNoiseScale);
 
                 //summing noise at different scales
                 fractalValue += pow(2, -i) * noiseData.f1;
             }
 
-            fractalValue = lerp(0.5, 1.0, fractalValue);
+            //range of sum of fractal noise appears to be > 1.0. I am not sure if 
+            //this is correct so I correct it by changing the range to [0, 1]
+            fractalValue = smoothstep(0.0, 1.5, fractalValue);
 
+            //reducing range to reduce intensity of effect
+            fractalValue = lerp(1-_GrooveNoiseIntensity, 1.0, fractalValue);
+
+            //float that holds fractal noise to be used on tiles themselves
             float fractalValue2;
 
             //computing different fractal version
             for (int i = 0; i < 5; i++)
             {
-                WorleyNoiseData noiseData = worley(pow(2, i) * IN.uv_MainTex * 25);
+                WorleyNoiseData noiseData = worley(pow(2, i) * IN.uv_MainTex * _TileNoiseScale);
 
                 //summing noise at different scales
                 fractalValue2 += pow(2, -i) * (noiseData.f2 - noiseData.f1);
             }
 
-            fractalValue2 = lerp(0.5, 1.0, fractalValue);
+            fractalValue2 = smoothstep(0.0, 1.5, fractalValue2);
+
+            //reducing range to reduce intensity of effect
+            fractalValue2 = lerp(1-_TileNoiseIntensity, 1.0, fractalValue2);
 
             //position of color in LUT
             float lutColor = (1 - distanceComb) * step(0.05, distanceComb2);
 
+            //uv to use to get color from LUT
             float2 uv = float2(lutColor, 0.5);
 
+            //checking which fractal value to use if pixel is in tile or in groove
+            //true - pixel is in tile
             if (lutColor != 0)
                 fractalValue = fractalValue2;
 

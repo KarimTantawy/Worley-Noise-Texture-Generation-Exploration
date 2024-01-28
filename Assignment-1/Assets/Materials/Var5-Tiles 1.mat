@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Var6-Clouds
-  m_Shader: {fileID: 4800000, guid: a135dc6f4bf60bb4a9bac0e50c3c2663, type: 3}
+  m_Name: Var5-Tiles 1
+  m_Shader: {fileID: 4800000, guid: a247286405a18c54aa4173c0e343d7ad, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -44,11 +44,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 9a88671594dea2548a8e0c7e99a217a5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MossTex:
+        m_Texture: {fileID: 2800000, guid: 1aa12560a7eb0a649b8946c75e3a9668, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -65,20 +69,26 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FractalNoiseScale: 7.07
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _GrooveNoiseIntensity: 0.49
+    - _GrooveNoiseScale: 125.1
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseScale: 15
+    - _MossGrowthIntensity: 0.331
+    - _MossIntensity: 0.754
+    - _MossNoiseIntensity: 0.6
+    - _MossNoiseScale: 72.1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TileNoiseIntensity: 0.3
+    - _TileNoiseScale: 14.6
     - _UVSec: 0
-    - _WorleyScale: 10
+    - _WorleyScale: 15
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

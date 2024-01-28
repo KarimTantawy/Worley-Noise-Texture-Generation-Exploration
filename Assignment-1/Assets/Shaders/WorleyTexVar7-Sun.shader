@@ -1,11 +1,10 @@
-Shader "Custom/WorleyTexVar6-2"
+Shader "Custom/WorleyTexVar7"
 {
     Properties
     {
         _MainTex ("Color LUT", 2D) = "white" {}
         _WorleyScale("Worley Scale", Float) = 10.0
         _FractalNoiseScale("Fractal Noise Scale", Float) = 15
-        _MossIntensity("Moss Intensity", Range(0.0, 1.0)) = 0.5
     }
     SubShader
     {
@@ -26,7 +25,6 @@ Shader "Custom/WorleyTexVar6-2"
         sampler2D _MainTex;
         float _WorleyScale;
         float _FractalNoiseScale;
-        float _MossIntensity;
 
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
@@ -140,23 +138,19 @@ Shader "Custom/WorleyTexVar6-2"
             //normalizing value to range between 0.0 and 1.0 when adding the fractal value to the distance combination
             //otherwise color would be oversaturated
             float lutColor = smoothstep(0.0, 2.0, noiseData.f1 + fractalValue);
-            lutColor = 1 - lutColor;
 
             //uv coordinate for final LUT color
             float2 uv = float2(lutColor, 0.5);
 
-            if (uv.x <= (1-_MossIntensity))
-                uv.x = 0.0;
-
-
             //clamping values because edges of LUT texture are gray and affect the color gradient
             uv.x = clamp(uv.x, 0.01, 0.99);
-            
-            //setting final color
-            fixed4 c = tex2D(_MainTex, uv);
 
-            if (fractalValue > 1.0)
-                c = fixed4(1.0, 0.0, 0.0, 1.0);
+            float distance = length(IN.uv_MainTex - float2(0.5, 0.5));
+
+            float isSun = 1 - smoothstep(0.5 - (0.5 * 0.01), 0.5 + (0.5 * 0.01), dot(distance, distance) * 4.0);
+
+            //setting final color
+            fixed4 c = tex2D(_MainTex, uv) * isSun;
 
             o.Albedo = c.rgb;
             o.Alpha = c.a;

@@ -68,6 +68,8 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _GrooveNoiseIntensity: 0.265
+    - _GrooveNoiseScale: 23.2
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -75,8 +77,10 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TileNoiseIntensity: 0.286
+    - _TileNoiseScale: 155.7
     - _UVSec: 0
-    - _WorleyScale: 10
+    - _WorleyScale: 15
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
