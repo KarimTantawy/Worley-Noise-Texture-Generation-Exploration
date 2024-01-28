@@ -55,11 +55,12 @@ Shader "Custom/WorleyTexVar2-2"
             //getting remainder or position within the specific tile within the grid
             float2 gridPosRem = frac(uv);
 
+
             //initializing final distances between pixel position and feature points
-            noiseData.f1 = 1.0;
-            noiseData.f2 = 1.0;
-            noiseData.f3 = 1.0;
-            noiseData.f4 = 1.0;
+            noiseData.f1 = 1000.0;
+            noiseData.f2 = 1000.0;
+            noiseData.f3 = 1000.0;
+            noiseData.f4 = 1000.0;
 
             /*iterate through neighborhood of current grid position where the
             point exists. Checking if feature points in neighboring tiles are closer to the pixel position

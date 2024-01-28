@@ -74,9 +74,10 @@ Material:
     - _GlossyReflections: 1
     - _GrooveNoiseIntensity: 0.49
     - _GrooveNoiseScale: 125.1
+    - _GrooveWidth: 0.05
     - _Metallic: 0
     - _Mode: 0
-    - _MossGrowthIntensity: 0.331
+    - _MossGrowthIntensity: 0.194
     - _MossIntensity: 0.754
     - _MossNoiseIntensity: 0.6
     - _MossNoiseScale: 72.1
@@ -85,7 +86,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TileNoiseIntensity: 0.3
+    - _TileNoiseIntensity: 0.245
     - _TileNoiseScale: 14.6
     - _UVSec: 0
     - _WorleyScale: 15

@@ -56,10 +56,10 @@ Shader "Custom/WorleyTexVar8"
             float2 gridPosRem = frac(uv);
 
             //initializing final distances between pixel position and feature points
-            noiseData.f1 = 1.0;
-            noiseData.f2 = 1.0;
-            noiseData.f3 = 1.0;
-            noiseData.f4 = 1.0;
+            noiseData.f1 = 1000.0;
+            noiseData.f2 = 1000.0;
+            noiseData.f3 = 1000.0;
+            noiseData.f4 = 1000.0;
 
             /*iterate through neighborhood of current grid position where the
             point exists. Checking if feature points in neighboring tiles are closer to the pixel position
@@ -74,10 +74,8 @@ Shader "Custom/WorleyTexVar8"
                     //position of current feature point
                     float2 curPoint = randomNumGenerator(gridPos + neighbor);
 
-                    float2 vec = neighbor + curPoint - gridPosRem;
-
                     //Manhatten distance from position of pixel to feature point
-                    float dist = abs(vec.x) + abs(vec.y);
+                    float dist = length((neighbor + curPoint) - gridPosRem);
                     
                     //checking if distance to feature point is closer than any of the currently stored distances
                     if (dist < noiseData.f1)
@@ -118,9 +116,7 @@ Shader "Custom/WorleyTexVar8"
             WorleyNoiseData noiseData = Worley(scaledUV);
 
             //combination of distances
-            float distanceComb = noiseData.f1;
-            
-            distanceComb = clamp(distanceComb, 0.0, 1.0);
+            float distanceComb = noiseData.f3 - noiseData.f2;
 
             //use Color LUT to determine color of pixel
             float2 uv = float2(1-distanceComb, 0.5);
@@ -130,7 +126,11 @@ Shader "Custom/WorleyTexVar8"
 
             fixed4 c = tex2D(_MainTex, uv);
      
-            c = fixed4(distanceComb, distanceComb, distanceComb, 1.0);
+            //c = fixed4(distanceComb, distanceComb, distanceComb, 1.0);
+
+            //Visual debugging to see if values are out of expected range of [0.0, 1.0]
+            //if(distanceComb >= 1.0)
+            //    c = fixed4(1.0, 0.0, 0.0, 1.0);
 
             o.Albedo = c.rgb;
             o.Alpha = c.a;

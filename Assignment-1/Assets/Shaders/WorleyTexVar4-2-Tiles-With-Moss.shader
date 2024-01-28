@@ -5,8 +5,9 @@ Shader "Custom/WorleyTexVar4-2-Tiles-With-Moss"
         _MainTex ("Color LUT", 2D) = "white" {}
         _MossTex("Moss Color LUT", 2D) = "white" {}
         _WorleyScale("Worley Scale", Float) = 10.0
-        _MossGrowthIntensity("Moss Growth Intensity", Range(0.0, 1.0)) = 0.5
-        _TileNoiseIntensity("Tile Noise Intensity", Range(0.0, 1.0)) = 0.6
+        _MossGrowthIntensity("Moss Growth Intensity", Range(0.0, 0.5)) = 0.18
+        _TileNoiseIntensity("Tile Noise Intensity", Range(0.0, 0.6)) = 0.25
+        _GrooveWidth("Tile Groove Width", Range(0.0, 0.15)) = 0.05
     }
     SubShader
     {
@@ -29,6 +30,7 @@ Shader "Custom/WorleyTexVar4-2-Tiles-With-Moss"
         float _WorleyScale;
         float _TileNoiseIntensity;
         float _MossGrowthIntensity;
+        float _GrooveWidth;
 
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
@@ -62,10 +64,10 @@ Shader "Custom/WorleyTexVar4-2-Tiles-With-Moss"
             float2 gridPosRem = frac(uv);
 
             //initializing final distances between pixel position and feature points
-            noiseData.f1 = 1.0;
-            noiseData.f2 = 1.0;
-            noiseData.f3 = 1.0;
-            noiseData.f4 = 1.0;
+            noiseData.f1 = 1000.0;
+            noiseData.f2 = 1000.0;
+            noiseData.f3 = 1000.0;
+            noiseData.f4 = 1000.0;
 
             /*iterate through neighborhood of current grid position where the
             point exists. Checking if feature points in neighboring tiles are closer to the pixel position
@@ -147,7 +149,9 @@ Shader "Custom/WorleyTexVar4-2-Tiles-With-Moss"
             float lutColorTile = smoothstep(0.0, 2.0, (1 - distanceComb) + fractalValueTile);
 
             //checking if it should be tile or edges between tile and determining the final LUT color that way
-            lutColorTile = lutColorTile * step(0.05, distanceComb2);
+
+            if(distanceComb2 <= _GrooveWidth)
+                lutColorTile = 0.0;
             //END - CREATING TILES
             
             //BEGIN - CREATING MOSS

@@ -29,15 +29,15 @@ Shader "Custom/WorleyTexVar1-Polka-Dots"
             UNITY_INSTANCING_BUFFER_START(Props)
             UNITY_INSTANCING_BUFFER_END(Props)
 
-                //struct holds the distances of the four nearest feature points
-                struct WorleyNoiseData
-                {
-                    float f1;
-                    float f1_id;
-                    float f2;
-                    float f3;
-                    float f4;
-                };
+            //struct holds the distances of the four nearest feature points
+            struct WorleyNoiseData
+            {
+                float f1;
+                float f1_id;
+                float f2;
+                float f3;
+                float f4;
+            };
 
             //returns: float value between 0 and 1
             float2 randomNumGenerator(float2 gridPosition)
@@ -58,10 +58,10 @@ Shader "Custom/WorleyTexVar1-Polka-Dots"
                  float2 gridPosRem = frac(uv);
 
                  //initializing final distances between pixel position and feature points
-                 noiseData.f1 = 1.0;
-                 noiseData.f2 = 1.0;
-                 noiseData.f3 = 1.0;
-                 noiseData.f4 = 1.0;
+                 noiseData.f1 = 1000.0;
+                 noiseData.f2 = 1000.0;
+                 noiseData.f3 = 1000.0;
+                 noiseData.f4 = 1000.0;
 
                  /*iterate through neighborhood of current grid position where the
                  point exists. Checking if feature points in neighboring tiles are closer to the pixel position
