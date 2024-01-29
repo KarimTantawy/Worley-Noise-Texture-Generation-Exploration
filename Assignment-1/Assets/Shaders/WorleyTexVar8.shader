@@ -64,9 +64,9 @@ Shader "Custom/WorleyTexVar8"
             /*iterate through neighborhood of current grid position where the
             point exists. Checking if feature points in neighboring tiles are closer to the pixel position
             to prevent discontinuity*/
-            for (int i = -1; i <= 1; i++)
+            for (int i = -2; i <= 2; i++)
             {
-                for (int k = -1; k <= 1; k++)
+                for (int k = -2; k <= 2; k++)
                 {
                     //current neighbor position
                     float2 neighbor = float2(i, k);
@@ -116,7 +116,7 @@ Shader "Custom/WorleyTexVar8"
             WorleyNoiseData noiseData = Worley(scaledUV);
 
             //combination of distances
-            float distanceComb = noiseData.f3 - noiseData.f2;
+            float distanceComb = noiseData.f4 - noiseData.f3;
 
             //use Color LUT to determine color of pixel
             float2 uv = float2(1-distanceComb, 0.5);
