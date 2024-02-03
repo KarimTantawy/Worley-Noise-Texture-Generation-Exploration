@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Var6-Clouds
-  m_Shader: {fileID: 4800000, guid: a135dc6f4bf60bb4a9bac0e50c3c2663, type: 3}
+  m_Shader: {fileID: 4800000, guid: 6cf9397c67def5f4991824a2aee4d659, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

@@ -1,13 +1,10 @@
-Shader "Custom/Tiles-With-Moss"
+Shader "Custom/Clouds-With-Perlin"
 {
     Properties
     {
         _MainTex ("Color LUT", 2D) = "white" {}
-        _MossTex("Moss Color LUT", 2D) = "white" {}
         _WorleyScale("Worley Scale", Float) = 10.0
-        _MossGrowthIntensity("Moss Growth Intensity", Range(0.0, 0.5)) = 0.18
-        _TileNoiseIntensity("Tile Noise Intensity", Range(0.0, 0.6)) = 0.25
-        _GrooveWidth("Tile Groove Width", Range(0.0, 0.15)) = 0.05
+        _FractalNoiseScale("Fractal Noise Scale", Float) = 15
     }
     SubShader
     {
@@ -26,11 +23,8 @@ Shader "Custom/Tiles-With-Moss"
         };
 
         sampler2D _MainTex;
-        sampler2D _MossTex;
         float _WorleyScale;
-        float _TileNoiseIntensity;
-        float _MossGrowthIntensity;
-        float _GrooveWidth;
+        float _FractalNoiseScale;
 
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
@@ -52,6 +46,31 @@ Shader "Custom/Tiles-With-Moss"
            fraction of sin function produces a result that appears pseudorandom
            this result is a float value between 0 and 1*/
            return frac(sin(float2(dot(gridPosition, float2(127.1, 311.7)), dot(gridPosition, float2(269.5, 183.3)))) * 43758.5453);
+        }
+
+        float2 randomGradiant(float2 p)
+        {
+            //Found algorithm on https://thebookofshaders.com/12/ by Patricio Gonzalez Vivo & Jen Lowe
+            p = float2(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)));
+
+            return -1.0 + 2.0 * frac(sin(p) * 43758.5453123);
+        }
+
+        float perlinNoise(float2 uv)
+        {
+            float2 i = floor(uv);
+            float2 rem = frac(uv);
+
+            //finding dot product of random gradient from corner and fragment position(rem)
+            float2 p1 = dot(randomGradiant(i), rem);
+            float2 p2 = dot(randomGradiant(i + float2(1.0, 0.0)), rem - float2(1.0, 0.0));
+            float2 p3 = dot(randomGradiant(i + float2(0.0, 1.0)), rem - float2(0.0, 1.0));
+            float2 p4 = dot(randomGradiant(i + float2(1.0, 1.0)), rem - float2(1.0, 1.0));
+
+            //fade function
+            float2 u = rem * rem * rem * (rem * (rem * 6 - 15) + 10);
+
+            return lerp(lerp(p1, p2, u.x), lerp(p3, p4, u.x), u.y);
         }
 
         WorleyNoiseData worley(float2 uv)
@@ -120,71 +139,29 @@ Shader "Custom/Tiles-With-Moss"
             //scale the UV depending on how many sites we want for the Worley noise
             float2 scaledUV = IN.uv_MainTex * _WorleyScale;
 
-            //generating the Worley noise data
+            float p = perlinNoise(scaledUV);
+
+            //calculating the Worley noise data
             WorleyNoiseData noiseData = worley(scaledUV);
 
-            //combination of distances
-            float distanceComb = noiseData.f1_id;
-            float distanceComb2 = noiseData.f2 - noiseData.f1;
-
-            //BEGIN - CREATING TILES
-            //float that holds fractal noise to be used on tiles themselves
             float fractalValue;
 
-            //computing different fractal noise
-            //starting it from 0 because 2^-i coefficient and 2^i coefficients will be 1 when 
-            //i = 0. This means big part of the sum will be worley noise at _WorleyScale which 
-            //is the same scale used for the tiles so the moss will be influenced by this scale 
-            //the most and grow in between the tile grooves.
-            for (int i = 0; i < 5; i++)
+            //computing fractal noise
+            for (int i = 1; i < 5; i++)
             {
-                WorleyNoiseData noiseData = worley(pow(2, i) * IN.uv_MainTex * _WorleyScale);
+                WorleyNoiseData noiseData = worley(pow(2, i) * IN.uv_MainTex * _FractalNoiseScale);
 
                 //summing noise at different scales
                 fractalValue += pow(2, -i) * noiseData.f1;
             }
 
-            fractalValue = smoothstep(0.0, 1.5, fractalValue);
+            //normalizing value to range between 0.0 and 1.0 when adding the fractal value to the distance combination
+            //otherwise color would be oversaturated
+            //also inverting intensity so edges are darker like clouds
+            float intensity = 1 - smoothstep(0.0, 2.0, noiseData.f1 + fractalValue);
 
-            //reducing range to reduce intensity of effect
-            float fractalValueTile = lerp(1-_TileNoiseIntensity, 1.0, fractalValue);
-
-            //position of color in LUT
-            float lutColorTile = smoothstep(0.0, 2.0, (1 - distanceComb) + fractalValueTile);
-
-            //checking if it should be tile or edges between tile and determining the final LUT color that way
-            lutColorTile *= step(_GrooveWidth, distanceComb2);
-            //END - CREATING TILES
-            
-            //BEGIN - CREATING MOSS
-            
-            //fuzzier moss
-            //fuzzy moss is created by perturbing the moss growth by a random number
-            // looks good at high scales but it becomes obvious it is random noise and illusion is ruined at low scales
-            //float lutColorMoss = smoothstep(0.0, 2.0, noiseData.f1 + fractalValue + (randomNumGenerator(IN.uv_MainTex) / 5));
-
-            float lutColorMoss = smoothstep(0.0, 2.0, noiseData.f1 + fractalValue);
-
-            //END - CREATING MOSS
-
-            float2 uv = float2(lutColorMoss, 0.5);
-
-            uv.x = clamp(uv.x, 0.01, 0.99);
-
-            fixed4 finalColor = tex2D(_MossTex, uv);
-
-            //adding Moss on top of tile
-            //this check is kind of like step function to see when to transition to tile instead of moss
-            if (uv.x <= (1-_MossGrowthIntensity))
-            {
-                uv = float2(lutColorTile, 0.5);
-
-                uv.x = clamp(uv.x, 0.01, 0.99);
-
-                finalColor = tex2D(_MainTex, uv);
-            }
-
-            fixed4 c = finalColor;
+            //setting final color
+            fixed4 c = fixed4(p, p, p, 1.0);
 
             o.Albedo = c.rgb;
             o.Alpha = c.a;

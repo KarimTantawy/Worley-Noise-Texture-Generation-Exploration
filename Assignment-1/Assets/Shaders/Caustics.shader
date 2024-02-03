@@ -152,7 +152,7 @@ Shader "Custom/Caustics"
             float distanceComb3 = noiseData3.f1;
 
             //blending the three caustic layers
-            float finalDist =lerp(distanceComb, distanceComb2, _LayerTwoIntensity);
+            float finalDist = lerp(distanceComb, distanceComb2, _LayerTwoIntensity);
             finalDist = lerp(finalDist, distanceComb3, _LayerThreeIntensity);
 
             //finalDist = smoothstep(0.0, 3.0, distanceComb + distanceComb2 + distanceComb3);

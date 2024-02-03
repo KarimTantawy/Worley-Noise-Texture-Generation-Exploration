@@ -67,11 +67,11 @@
     <None Include="Assets\Shaders\Moss-Clouds.shader" />
     <None Include="Assets\Shaders\D4-D3-Crystals.shader" />
     <None Include="Assets\Shaders\SitePlacementExample.shader" />
-    <None Include="Assets\Shaders\Test.shader" />
     <None Include="Assets\Shaders\Mosaic.shader" />
     <None Include="Assets\Shaders\Sun-Surface.shader" />
     <None Include="Assets\Shaders\Tiles-With-Noise.shader" />
     <None Include="Assets\Shaders\Starry-Sky.shader" />
+    <None Include="Assets\Shaders\Clouds-With-Perlin.shader" />
     <None Include="Assets\Shaders\Polka-Dots.shader" />
     <None Include="Assets\Shaders\D2-D1-Step-Layered.shader" />
     <None Include="Assets\Shaders\Caustics.shader" />
